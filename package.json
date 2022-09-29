@@ -1,16 +1,27 @@
 {
-  "name": "rdiff",
+  "name": "rdiff-napi",
   "version": "0.0.1",
   "main": "index.js",
+  "type": "commonjs",
+  "files": [
+    "index.d.ts",
+    "index.js",
+    "src",
+    "CMakeLists.txt"
+  ],
   "scripts": {
-    "compile": "rimraf build && cmake-js compile",
-    "start": "rimraf tests/cache && node index.js"
+    "install": "cmake-js compile",
+    "clean": "rimraf build",
+    "test": "rimraf tests/cache && node test.js"
   },
   "dependencies": {
+    "cmake-js": "^6.1.0",
     "node-addon-api": "^3.0.0"
   },
   "devDependencies": {
-    "cmake-js": "^6.1.0",
     "rimraf": "^3.0.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
