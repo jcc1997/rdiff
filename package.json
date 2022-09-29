@@ -1,0 +1,16 @@
+{
+  "name": "rdiff",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "compile": "rimraf build && cmake-js compile",
+    "start": "rimraf tests/cache && node index.js"
+  },
+  "dependencies": {
+    "node-addon-api": "^3.0.0"
+  },
+  "devDependencies": {
+    "cmake-js": "^6.1.0",
+    "rimraf": "^3.0.2"
+  }
+}
