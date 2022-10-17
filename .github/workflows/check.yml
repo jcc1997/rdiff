@@ -1,0 +1,39 @@
+name: Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check:
+    runs-on: ${{matrix.os}}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        build: [Release]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: pnpm/action-setup@v2.2.4
+      with:
+        version: 7.13.5
+
+    - name: Build all
+      # Build your program with the given configuration.
+      run: pnpm install
+
+    - name: Upload build
+      uses: actions/upload-artifact@v2
+      with:
+        name: build results ${{matrix.os}} ${{matrix.build}} ${{matrix.options}}
+        path: ${{github.workspace}}/build
+        if-no-files-found: error
