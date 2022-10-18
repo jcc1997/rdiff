@@ -39,5 +39,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: build results ${{matrix.os}} ${{matrix.build}} ${{matrix.options}}
-          path: ${{github.workspace}}/build
+          path: ${{github.workspace}}/build/Release
           if-no-files-found: error
