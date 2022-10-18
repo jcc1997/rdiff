@@ -7,7 +7,7 @@
 /* #undef DO_RS_TRACE */
 
 /* Define to 1 if you have the <sys/file.h> header file. */
-#define HAVE_SYS_FILE_H 1
+// #define HAVE_SYS_FILE_H 1
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
@@ -16,7 +16,7 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#define HAVE_UNISTD_H 1
+// #define HAVE_UNISTD_H 1
 
 /* Define to 1 if you have the <io.h> header file. */
 /* #undef HAVE_IO_H */
@@ -40,7 +40,7 @@
 #define HAVE___FUNCTION__
 
 /* Define to 1 if fseeko (and presumably ftello) exists and is declared. */
-#define HAVE_FSEEKO 1
+// #define HAVE_FSEEKO 1
 
 /* Define to 1 if fseeko64 (and presumably ftello64) exists and is declared. */
 /* #undef HAVE_FSEEKO64 */

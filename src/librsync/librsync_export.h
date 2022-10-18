@@ -6,9 +6,11 @@
 #  else
 #    ifdef _WIN32
 #      ifdef rsync_EXPORTS
-#        define LIBRSYNC_EXPORT __declspec(dllexport)
+// #        define LIBRSYNC_EXPORT __declspec(dllexport)
+#        define LIBRSYNC_EXPORT
 #      else
-#        define LIBRSYNC_EXPORT __declspec(dllimport)
+// #        define LIBRSYNC_EXPORT __declspec(dllimport)
+#        define LIBRSYNC_EXPORT
 #      endif
 #    else
 #      define LIBRSYNC_EXPORT __attribute__((visibility("default")))
