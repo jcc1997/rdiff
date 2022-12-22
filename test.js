@@ -1,3 +1,11 @@
+// const {
+//   signature,
+//   delta,
+//   patch,
+//   signatureAsync,
+//   deltaAsync,
+//   patchAsync,
+// } = require("./build/Release/rdiff.node");
 const {
   signature,
   delta,
@@ -5,7 +13,7 @@ const {
   signatureAsync,
   deltaAsync,
   patchAsync,
-} = require("./build/Release/rdiff.node");
+} = require("./prebuild/darwin-x64/rdiff.node");
 const path = require("path");
 const fs = require("fs");
 const rimraf = require("rimraf");
@@ -52,7 +60,7 @@ async function asyncTest(i) {
 }
 
 async function benchMark() {
-  const TIMES = 10000;
+  const TIMES = 1;
 
   rimraf.sync(cacheDir);
   ensureCacheDir();
