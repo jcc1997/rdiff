@@ -12,7 +12,7 @@
   "scripts": {
     "install": "cmake-js compile",
     "clean": "rimraf build",
-    "test": "rimraf tests/cache && node test.js"
+    "test": "node test.js"
   },
   "dependencies": {
     "cmake-js": "^6.1.0",

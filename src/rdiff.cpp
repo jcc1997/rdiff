@@ -177,10 +177,42 @@ Napi::Boolean patch_warp(const Napi::CallbackInfo &info)
     return returnValue;
 }
 
+Napi::Value async_signature_warp(const Napi::CallbackInfo &info)
+{
+    Napi::Env env = info.Env();
+    Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
+    deferred.Resolve(signature_warp(info));
+
+    return deferred.Promise();
+}
+
+Napi::Value async_delta_warp(const Napi::CallbackInfo &info)
+{
+    Napi::Env env = info.Env();
+    Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
+    deferred.Resolve(delta_warp(info));
+
+    return deferred.Promise();
+}
+
+Napi::Value async_patch_warp(const Napi::CallbackInfo &info)
+{
+    Napi::Env env = info.Env();
+    Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
+    deferred.Resolve(patch_warp(info));
+
+    return deferred.Promise();
+}
+
 Napi::Object rdiff::Init(Napi::Env env, Napi::Object exports)
 {
+    // sync
     exports.Set("signature", Napi::Function::New(env, signature_warp));
     exports.Set("delta", Napi::Function::New(env, delta_warp));
     exports.Set("patch", Napi::Function::New(env, patch_warp));
+    // async
+    exports.Set("signatureAsync", Napi::Function::New(env, async_signature_warp));
+    exports.Set("deltaAsync", Napi::Function::New(env, async_delta_warp));
+    exports.Set("patchAsync", Napi::Function::New(env, async_patch_warp));
     return exports;
 }
