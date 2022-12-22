@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: 16
 
-      - uses: pnpm/action-setup@v2.0.1
+      - uses: pnpm/action-setup@v2
         name: Install pnpm
         id: pnpm-install
         with:
@@ -51,7 +51,7 @@ jobs:
         run: pnpm install
 
       - name: Upload build
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: build ${{matrix.os}} ${{matrix.build}} ${{matrix.build}}
           path: ${{github.workspace}}/build/Release
