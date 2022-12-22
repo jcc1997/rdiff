@@ -85,6 +85,8 @@ async function main() {
   // rimraf.sync(cacheDir);
 
   await benchMark();
+  // sync: 6.900s
+  // async: 4.651s
 }
 
 main();
