@@ -51,7 +51,7 @@ async function asyncTest(i) {
   );
 }
 
-async function main() {
+async function benchMark() {
   const TIMES = 10000;
 
   rimraf.sync(cacheDir);
@@ -71,6 +71,20 @@ async function main() {
   console.timeEnd("async");
 
   rimraf.sync(cacheDir);
+}
+
+async function main() {
+  // rimraf.sync(cacheDir);
+  // ensureCacheDir();
+
+  // await signatureAsync(
+  //   path.join(__dirname, "tests/old_file"),
+  //   path.join(__dirname, `tests/cache/old.sig`)
+  // );
+
+  // rimraf.sync(cacheDir);
+
+  await benchMark();
 }
 
 main();

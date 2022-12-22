@@ -1,5 +1,5 @@
 #include "librsync.h"
-#include "rdiff.h"
+#include <napi.h>
 
 using namespace std;
 
@@ -177,34 +177,196 @@ Napi::Boolean patch_warp(const Napi::CallbackInfo &info)
     return returnValue;
 }
 
+class SignatureAsyncWorker : public Napi::AsyncWorker
+{
+public:
+    static Napi::Value Do(const Napi::CallbackInfo &info)
+    {
+        Napi::Env env = info.Env();
+        if (info.Length() < 2 || !info[0].IsString() || !info[1].IsString())
+        {
+            Napi::TypeError::New(env, "arg1::String, arg2::String expected").ThrowAsJavaScriptException();
+        }
+        // convert javascripts datatype to c++
+        Napi::String basis_file_name = info[0].As<Napi::String>();
+        Napi::String sig_file_name = info[1].As<Napi::String>();
+        SignatureAsyncWorker *worker =
+            new SignatureAsyncWorker(
+                env,
+                "SignatureAsyncWorker",
+                basis_file_name.Utf8Value(),
+                sig_file_name.Utf8Value());
+        worker->Queue();
+        return worker->_deferred.Promise();
+    }
+
+    SignatureAsyncWorker(Napi::Env env,
+                         const char *resource_name,
+                         std::string basis_file_name,
+                         std::string sig_file_name)
+        : AsyncWorker(env, resource_name),
+          _deferred(Napi::Promise::Deferred::New(env)),
+          basis_file_name(basis_file_name),
+          sig_file_name(sig_file_name) {}
+
+protected:
+    void Execute() override
+    {
+        rs_result result = rdiff_sig(basis_file_name.c_str(), sig_file_name.c_str());
+        _result = result == 0;
+    }
+    virtual void OnOK() override { _deferred.Resolve(Napi::Boolean::New(Env(), _result)); }
+    virtual void OnError(const Napi::Error &e) override { _deferred.Reject(Napi::String::New(Env(), e.Message())); }
+
+private:
+    Napi::Promise::Deferred _deferred;
+    std::string basis_file_name;
+    std::string sig_file_name;
+    bool _result;
+};
+
+class DeltaAsyncWorker : public Napi::AsyncWorker
+{
+public:
+    static Napi::Value Do(const Napi::CallbackInfo &info)
+    {
+        Napi::Env env = info.Env();
+        // check if arguments are integer only.
+        if (info.Length() < 3 || !info[0].IsString() || !info[1].IsString() || !info[2].IsString())
+        {
+            Napi::TypeError::New(env, "arg1::String, arg2::String, arg3::String expected").ThrowAsJavaScriptException();
+        }
+        // convert javascripts datatype to c++
+        Napi::String sig_file_name = info[0].As<Napi::String>();
+        Napi::String new_file_name = info[1].As<Napi::String>();
+        Napi::String delta_file_name = info[2].As<Napi::String>();
+        DeltaAsyncWorker *worker =
+            new DeltaAsyncWorker(
+                env,
+                "DeltaAsyncWorker",
+                sig_file_name.Utf8Value(),
+                new_file_name.Utf8Value(),
+                delta_file_name.Utf8Value());
+        worker->Queue();
+        return worker->_deferred.Promise();
+    }
+
+    DeltaAsyncWorker(Napi::Env env,
+                     const char *resource_name,
+                     std::string sig_file_name,
+                     std::string new_file_name,
+                     std::string delta_file_name)
+        : AsyncWorker(env, resource_name),
+          _deferred(Napi::Promise::Deferred::New(env)),
+          sig_file_name(sig_file_name),
+          new_file_name(new_file_name),
+          delta_file_name(delta_file_name) {}
+
+protected:
+    void Execute() override
+    {
+        rs_result result = rdiff_delta(sig_file_name.c_str(), new_file_name.c_str(), delta_file_name.c_str());
+        _result = result == 0;
+    }
+    virtual void OnOK() override { _deferred.Resolve(Napi::Boolean::New(Env(), _result)); }
+    virtual void OnError(const Napi::Error &e) override { _deferred.Reject(Napi::String::New(Env(), e.Message())); }
+
+private:
+    Napi::Promise::Deferred _deferred;
+    std::string sig_file_name;
+    std::string new_file_name;
+    std::string delta_file_name;
+    bool _result;
+};
+
+class PatchAsyncWorker : public Napi::AsyncWorker
+{
+public:
+    static Napi::Value Do(const Napi::CallbackInfo &info)
+    {
+        Napi::Env env = info.Env();
+        // check if arguments are integer only.
+        if (info.Length() < 3 || !info[0].IsString() || !info[1].IsString() || !info[2].IsString())
+        {
+            Napi::TypeError::New(env, "arg1::String, arg2::String, arg3::String expected").ThrowAsJavaScriptException();
+        }
+        // convert javascripts datatype to c++
+        Napi::String basis_file_name = info[0].As<Napi::String>();
+        Napi::String delta_file_name = info[1].As<Napi::String>();
+        Napi::String new_file_name = info[2].As<Napi::String>();
+        PatchAsyncWorker *worker =
+            new PatchAsyncWorker(
+                env,
+                "PatchAsyncWorker",
+                basis_file_name.Utf8Value(),
+                delta_file_name.Utf8Value(),
+                new_file_name.Utf8Value());
+        worker->Queue();
+        return worker->_deferred.Promise();
+    }
+
+    PatchAsyncWorker(Napi::Env env,
+                     const char *resource_name,
+                     std::string basis_file_name,
+                     std::string delta_file_name,
+                     std::string new_file_name)
+        : AsyncWorker(env, resource_name),
+          _deferred(Napi::Promise::Deferred::New(env)),
+          basis_file_name(basis_file_name),
+          delta_file_name(delta_file_name),
+          new_file_name(new_file_name) {}
+
+protected:
+    void Execute() override
+    {
+        rs_result result = rdiff_patch(basis_file_name.c_str(), delta_file_name.c_str(), new_file_name.c_str());
+        _result = result == 0;
+    }
+    virtual void OnOK() override { _deferred.Resolve(Napi::Boolean::New(Env(), _result)); }
+    virtual void OnError(const Napi::Error &e) override { _deferred.Reject(Napi::String::New(Env(), e.Message())); }
+
+private:
+    Napi::Promise::Deferred _deferred;
+    std::string basis_file_name;
+    std::string delta_file_name;
+    std::string new_file_name;
+    bool _result;
+};
+
 Napi::Value async_signature_warp(const Napi::CallbackInfo &info)
 {
-    Napi::Env env = info.Env();
-    Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
-    deferred.Resolve(signature_warp(info));
+    // Napi::Env env = info.Env();
+    // Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
+    // deferred.Resolve(signature_warp(info));
 
-    return deferred.Promise();
+    // return deferred.Promise();
+
+    return SignatureAsyncWorker::Do(info);
 }
 
 Napi::Value async_delta_warp(const Napi::CallbackInfo &info)
 {
-    Napi::Env env = info.Env();
-    Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
-    deferred.Resolve(delta_warp(info));
+    // Napi::Env env = info.Env();
+    // Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
+    // deferred.Resolve(delta_warp(info));
 
-    return deferred.Promise();
+    // return deferred.Promise();
+
+    return DeltaAsyncWorker::Do(info);
 }
 
 Napi::Value async_patch_warp(const Napi::CallbackInfo &info)
 {
-    Napi::Env env = info.Env();
-    Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
-    deferred.Resolve(patch_warp(info));
+    // Napi::Env env = info.Env();
+    // Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
+    // deferred.Resolve(patch_warp(info));
 
-    return deferred.Promise();
+    // return deferred.Promise();
+
+    return PatchAsyncWorker::Do(info);
 }
 
-Napi::Object rdiff::Init(Napi::Env env, Napi::Object exports)
+Napi::Object Init(Napi::Env env, Napi::Object exports)
 {
     // sync
     exports.Set("signature", Napi::Function::New(env, signature_warp));
@@ -216,3 +378,5 @@ Napi::Object rdiff::Init(Napi::Env env, Napi::Object exports)
     exports.Set("patchAsync", Napi::Function::New(env, async_patch_warp));
     return exports;
 }
+
+NODE_API_MODULE(addon, Init)
